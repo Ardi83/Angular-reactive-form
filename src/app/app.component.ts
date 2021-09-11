@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 
 type LoginUserModel = {
   email: string;
@@ -11,6 +11,10 @@ type RegisterUserModel = {
   email: string;
   password: string;
   confirmPassword: string;
+  gender: string;
+  city: string;
+  country: string;
+  dateOfBirth: Date;
 }
 
 @Component({
@@ -23,6 +27,9 @@ export class AppComponent implements OnInit {
   users: RegisterUserModel[] = [];
   model = {} as LoginUserModel;
   loggedIn = '';
+  maxDate: Date;
+
+  constructor(private fb: FormBuilder) {}
 
   login() {
     const loggedInUser = this.users.find(user => user.email === this.model.email && user.password === this.model.password);
@@ -30,15 +37,21 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.initializeForm()
+    this.initializeForm();
+    this.maxDate = new Date();
+    this.maxDate.setFullYear(this.maxDate.getFullYear() - 18);
   }
 
   initializeForm() {
-    this.registerForm = new FormGroup({
-      name: new FormControl('John', Validators.required),
-      email: new FormControl('', Validators.required),
-      password: new FormControl('', [Validators.required, Validators.minLength(4), Validators.maxLength(8)]),
-      confirmPassword: new FormControl('', [Validators.required, this.matchValues('password')])
+    this.registerForm = this.fb.group({
+      name: ['', Validators.required],
+      email: ['', Validators.required],
+      gender: ['', Validators.required],
+      city: ['', Validators.required],
+      country: ['', Validators.required],
+      dateOfBirth: ['', Validators.required],
+      password: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(8)]],
+      confirmPassword: ['', [Validators.required, this.matchValues('password')]]
     })
     this.registerForm.controls.password.valueChanges.subscribe(() => {
       this.registerForm.controls.confirmPassword.updateValueAndValidity();
@@ -54,5 +67,6 @@ export class AppComponent implements OnInit {
 
   register() {
     this.users.push(this.registerForm.value);
+    console.log(this.users);
   }
 }
